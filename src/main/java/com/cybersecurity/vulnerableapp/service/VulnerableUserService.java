@@ -2,14 +2,12 @@ package com.cybersecurity.vulnerableapp.service;
 
 import com.cybersecurity.vulnerableapp.model.User;
 import com.cybersecurity.vulnerableapp.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VulnerableUserService {
@@ -17,34 +15,33 @@ public class VulnerableUserService {
     @Autowired
     private UserRepository userRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     /**
-     * VULNERABILITY 1: SQL INJECTION
-     * This method is intentionally vulnerable to SQL injection attacks.
+     * FIXED: SQL INJECTION VULNERABILITY
      * 
-     * ATTACK EXAMPLE:
+     * SECURITY FIX:
+     * - Replaced string concatenation with JPA repository method
+     * - Uses parameterized query internally (safe from SQL injection)
+     * - Finds user by username first, then compares password in Java
+     * 
+     * This prevents SQL injection attacks because:
+     * 1. JPA repository methods use parameterized queries automatically
+     * 2. User input is never directly concatenated into SQL
+     * 3. Password comparison happens in Java code, not SQL
+     * 
+     * Example attack that is now prevented:
      * Username: admin' OR '1'='1' --
-     * Password: anything
-     * 
-     * This will bypass authentication because the SQL query becomes:
-     * SELECT * FROM users WHERE username = 'admin' OR '1'='1' --' AND password = 'anything'
-     * 
-     * FIX: Use parameterized queries or JPA methods instead of string concatenation
+     * This will now be treated as a literal username string, not SQL code
      */
     public User authenticateUser(String username, String password) {
-        // VULNERABLE: Building SQL query with string concatenation
-        String sql = "SELECT * FROM users WHERE username = '" + username 
-                    + "' AND password = '" + password + "'";
+        // SECURE: Using JPA repository method with parameterized query
+        Optional<User> userOpt = userRepository.findByUsername(username);
         
-        Query query = entityManager.createNativeQuery(sql, User.class);
-        
-        @SuppressWarnings("unchecked")
-        List<User> users = query.getResultList();
-        
-        if (!users.isEmpty()) {
-            return users.get(0);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            // Compare password in Java (will be hashed in next fix)
+            if (user.getPassword().equals(password)) {
+                return user;
+            }
         }
         return null;
     }
