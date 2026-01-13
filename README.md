@@ -327,3 +327,4 @@ Created for cybersecurity education and demonstration purposes.
 - [CWE-89: SQL Injection](https://cwe.mitre.org/data/definitions/89.html)
 - [CWE-256: Plaintext Storage of Password](https://cwe.mitre.org/data/definitions/256.html)
 
+
