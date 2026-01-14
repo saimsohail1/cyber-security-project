@@ -274,3 +274,4 @@ public String signup(@Valid SignupDTO signupDTO, ...) {
 - [CWE-256: Plaintext Password Storage](https://cwe.mitre.org/data/definitions/256.html)
 
 
+

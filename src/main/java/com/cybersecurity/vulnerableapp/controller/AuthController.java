@@ -97,24 +97,30 @@ public class AuthController {
     }
 
     /**
-     * VULNERABLE SIGNUP ENDPOINT
-     * Vulnerabilities:
-     * 1. Broken Authentication - plain text password storage
-     * 2. No password complexity requirements
-     * 3. No email verification
+     * FIXED: MASS ASSIGNMENT / BROKEN ACCESS CONTROL
+     * 
+     * SECURITY FIX:
+     * - Removed role parameter from signup endpoint
+     * - Role is always set to "USER" on the server side
+     * - Users cannot escalate privileges during registration
+     * - Role assignment is controlled by server, not user input
+     * 
+     * This prevents privilege escalation attacks where users could:
+     * - Set role=ADMIN during signup via form manipulation
+     * - Use HTTP request manipulation (Burp Suite, etc.) to set role
+     * - Gain unauthorized admin access immediately after registration
      */
     @PostMapping("/signup")
     public String signup(@RequestParam String username,
                         @RequestParam String email,
                         @RequestParam String password,
-                        @RequestParam(required = false) String role,
                         RedirectAttributes redirectAttributes) {
         
-        // VULNERABILITY: No password complexity validation
-        // VULNERABILITY: Passwords stored in plain text
-        // VULNERABILITY: Role can be set by user (Mass Assignment risk)
+        // SECURE: Role is NOT accepted from user input
+        // Role is always set to "USER" on the server side
+        // This prevents Mass Assignment vulnerability
         
-        User user = userService.createUser(username, email, password, role);
+        User user = userService.createUser(username, email, password);
         
         if (user != null) {
             redirectAttributes.addFlashAttribute("success", 

@@ -167,3 +167,4 @@ Optional<User> userOpt = userRepository.findByUsername(username);
 
 **Bottom line:** Trust JPA! It handles SQL injection prevention for you. Just avoid string concatenation in SQL queries, and you're safe! ✅
 
+

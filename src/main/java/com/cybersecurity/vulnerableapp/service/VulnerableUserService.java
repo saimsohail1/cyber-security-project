@@ -52,24 +52,26 @@ public class VulnerableUserService {
     }
 
     /**
-     * FIXED: BROKEN AUTHENTICATION - Plain-Text Password Storage
+     * FIXED: BROKEN AUTHENTICATION + MASS ASSIGNMENT
      * 
-     * SECURITY FIX:
-     * - Passwords are now hashed using BCrypt before storage
-     * - BCrypt provides automatic salting (unique salt per password)
-     * - BCrypt is computationally expensive (resistant to brute force)
-     * - Database breach no longer exposes readable passwords
+     * SECURITY FIXES:
+     * 1. Password Hashing: Passwords are hashed using BCrypt before storage
+     * 2. Mass Assignment: Role is always set to "USER" on server side
+     * 
+     * Mass Assignment Fix:
+     * - Removed role parameter from method signature
+     * - Role is always set to "USER" (never from user input)
+     * - Prevents privilege escalation during registration
+     * - Only administrators can change user roles (via separate admin function)
      * 
      * BCrypt Benefits:
      * 1. One-way hashing (passwords cannot be reversed)
      * 2. Unique salt per password (stored in the hash itself)
      * 3. Configurable cost factor (default 10 rounds)
      * 4. Resistant to rainbow table attacks
-     * 
-     * Note: Rate limiting and account lockout can be added separately if needed
      */
     @Transactional
-    public User createUser(String username, String email, String password, String role) {
+    public User createUser(String username, String email, String password) {
         // Check if user already exists
         if (userRepository.findByUsername(username).isPresent() ||
             userRepository.findByEmail(email).isPresent()) {
@@ -85,7 +87,10 @@ public class VulnerableUserService {
         String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);
         
-        user.setRole(role != null ? role : "USER");
+        // SECURE: Role is always set to "USER" on the server side
+        // Users cannot set their own role (prevents Mass Assignment vulnerability)
+        // Only administrators can change roles through proper admin functions
+        user.setRole("USER");
         
         return userRepository.save(user);
     }
