@@ -32,11 +32,11 @@ This document describes the automated testing scripts and static analysis tools 
 
 ---
 
-### 2. Automated Exploit Script
+### 2. Automated Exploit Scripts
 
-A Python script was developed to automate SQL injection vulnerability testing:
+Three Python scripts were developed to automate vulnerability testing:
 
-#### SQL Injection Testing Script (`scripts/test_sql_injection.py`)
+#### 2.1 SQL Injection Testing Script (`scripts/test_sql_injection.py`)
 
 **Purpose:** Automate SQL injection exploit attempts
 
@@ -64,6 +64,55 @@ A Python script was developed to automate SQL injection vulnerability testing:
 
 ---
 
+#### 2.2 Mass Assignment Testing Script (`scripts/test_mass_assignment.py`)
+
+**Purpose:** Automate mass assignment / privilege escalation testing
+
+**What It Tests:**
+- Mass assignment vulnerability in signup endpoint
+- Privilege escalation via role parameter manipulation
+- Broken access control
+
+**Attack Method:**
+- Attempts to signup with `role=ADMIN` parameter
+- Verifies if admin panel access is granted
+- Checks if user was created with ADMIN privileges
+
+**Results:**
+- **Vulnerable Version (main branch):** Role parameter accepted, admin access granted
+- **Fixed Version (fixes branch):** Role parameter ignored, user created with USER role only
+
+**Demonstrates:**
+- ✅ Automated privilege escalation testing
+- ✅ Mass assignment vulnerability
+- ✅ Verification that fixes prevent privilege escalation
+
+---
+
+#### 2.3 Broken Authentication Testing Script (`scripts/test_broken_authentication.py`)
+
+**Purpose:** Automate broken authentication vulnerability testing
+
+**What It Tests:**
+- Plain-text password storage vulnerability
+- Password hashing verification (BCrypt)
+
+**Attack Method:**
+- Accesses admin panel to check password storage format
+- Verifies if passwords are stored in plain text or hashed
+- Checks for BCrypt hash patterns
+
+**Results:**
+- **Vulnerable Version (main branch):** Passwords stored in plain text
+- **Fixed Version (fixes branch):** Passwords hashed using BCrypt
+
+**Demonstrates:**
+- ✅ Automated password storage security testing
+- ✅ Broken authentication vulnerability
+- ✅ Verification that fixes implement proper password hashing
+
+---
+
 ## How Tools Aided Analysis
 
 ### 1. **Detection Phase**
@@ -72,9 +121,10 @@ A Python script was developed to automate SQL injection vulnerability testing:
 - **Code Review:** Provided exact locations for manual inspection
 
 ### 2. **Exploitation Phase**
-- **Automated Scripts:** Rapidly tested multiple attack vectors
+- **Automated Scripts:** Rapidly tested multiple attack vectors across all three vulnerabilities
 - **Reproducibility:** Same attacks could be executed consistently
 - **Documentation:** Scripts provide clear evidence of vulnerabilities
+- **Comprehensive Coverage:** Tests SQL injection, mass assignment, and broken authentication
 
 ### 3. **Verification Phase**
 - **Before/After Comparison:** Scripts run on both vulnerable and fixed versions
@@ -94,23 +144,33 @@ A Python script was developed to automate SQL injection vulnerability testing:
 ```bash
 git checkout main
 mvn spring-boot:run  # Start app
-python3 scripts/test_sql_injection.py  # In another terminal
+
+# Run all tests in another terminal
+python3 scripts/test_sql_injection.py
+python3 scripts/test_mass_assignment.py
+python3 scripts/test_broken_authentication.py
 ```
 
 **Expected Output:**
-- SQL injection successful
-- Authentication bypassed
+- SQL injection successful, authentication bypassed
+- Mass assignment successful, admin access granted
+- Passwords stored in plain text
 
 ### Testing Fixed Version (fixes branch)
 ```bash
 git checkout fixes
 mvn spring-boot:run  # Start app
-python3 scripts/test_sql_injection.py  # In another terminal
+
+# Run all tests in another terminal
+python3 scripts/test_sql_injection.py
+python3 scripts/test_mass_assignment.py
+python3 scripts/test_broken_authentication.py
 ```
 
 **Expected Output:**
-- All SQL injection attempts fail
-- Authentication properly protected
+- All SQL injection attempts fail, authentication properly protected
+- Mass assignment blocked, role parameter ignored
+- Passwords hashed using BCrypt
 
 ---
 
@@ -158,18 +218,25 @@ Automated SQL Injection Testing
 
 ## Summary
 
-The combination of **Semgrep static analysis** and **automated SQL injection testing script** provided:
+The combination of **Semgrep static analysis** and **three automated testing scripts** provided:
 
 1. **Automated Detection:** Semgrep identified SQL injection vulnerability in code
-2. **Automated Exploitation:** Script demonstrated SQL injection in action
-3. **Automated Verification:** Script confirmed fixes prevent SQL injection
+2. **Automated Exploitation:** Scripts demonstrated vulnerabilities in action:
+   - SQL injection (authentication bypass)
+   - Mass assignment (privilege escalation)
+   - Broken authentication (plain-text passwords)
+3. **Automated Verification:** Scripts confirmed fixes prevent all three vulnerabilities
 4. **Clear Documentation:** Tool outputs provide evidence for reports
 
 This approach demonstrates both **detection** (finding vulnerabilities) and **verification** (confirming fixes) through automation, satisfying the project requirements for tool usage and automation.
 
 ---
 
-**Script Location:** `scripts/test_sql_injection.py`  
+**Script Locations:**
+- `scripts/test_sql_injection.py` - SQL injection testing
+- `scripts/test_mass_assignment.py` - Mass assignment / privilege escalation testing
+- `scripts/test_broken_authentication.py` - Broken authentication / password hashing testing
+
 **Static Analysis Tool:** Semgrep (community rules)  
 **Language:** Python 3 with `requests` library
 
