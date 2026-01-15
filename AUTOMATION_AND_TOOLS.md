@@ -52,8 +52,10 @@ A Python script was developed to automate SQL injection vulnerability testing:
 - And other common SQL injection patterns
 
 **Results:**
-- **Vulnerable Version:** SQL injection successful, authentication bypassed
-- **Fixed Version:** All SQL injection attempts fail (parameterized queries prevent injection)
+- **Vulnerable Version (main branch):** SQL injection successful, authentication bypassed
+- **Fixed Version (fixes branch):** All SQL injection attempts fail (parameterized queries prevent injection)
+
+**Note:** The test script was improved to fix a false positive detection bug. It now correctly checks only the URL for `/dashboard` instead of searching response text (which caused false positives due to "Welcome Back" text on the login page).
 
 **Demonstrates:**
 - ✅ Automated SQL injection testing
@@ -126,6 +128,8 @@ src/main/java/com/cybersecurity/vulnerableapp/service/VulnerableUserService.java
 ```
 
 ### SQL Injection Script Output
+
+**Vulnerable Version (main branch):**
 ```
 ============================================================
 Automated SQL Injection Testing
@@ -133,6 +137,21 @@ Automated SQL Injection Testing
 [✓ SUCCESS] SQL Injection successful!
   Payload: admin' OR '1'='1' --
 [!] VULNERABILITY DETECTED: SQL Injection
+```
+
+**Fixed Version (fixes branch):**
+```
+============================================================
+Automated SQL Injection Testing
+============================================================
+[✗ FAIL] Payload: admin' OR '1'='1' --
+[✗ FAIL] Payload: ' OR '1'='1' --
+...
+[✓] No SQL injection vulnerabilities detected
+    This indicates:
+    - Input is properly parameterized
+    - SQL injection attacks are prevented
+    - Security fixes are working correctly
 ```
 
 ---
