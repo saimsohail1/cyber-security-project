@@ -3,7 +3,6 @@ package com.cybersecurity.vulnerableapp.controller;
 import com.cybersecurity.vulnerableapp.model.User;
 import com.cybersecurity.vulnerableapp.service.VulnerableUserService;
 import jakarta.servlet.http.HttpSession;
-import org.hibernate.exception.SQLGrammarException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
